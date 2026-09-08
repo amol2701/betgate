@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#111819">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Bet Gate</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -14,7 +13,7 @@
   :root{
     --bg:#111819; --panel:#182124; --panel2:#1E292D; --line:#2B383D;
     --ink:#E6EDEE; --muted:#8FA3A8; --dim:#63787E;
-    --pass:#4FB477; --block:#E05A4D; --hold:#D8A441;
+    --pass:#4FB477; --block:#E05A4D; --hold:#D8A441; --violet:#9B7FD4;
     --r:10px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -25,7 +24,7 @@
     padding:calc(12px + env(safe-area-inset-top)) 12px calc(40px + env(safe-area-inset-bottom));
     -webkit-user-select:none; user-select:none;
   }
-  input,select,textarea{-webkit-user-select:text; user-select:text}
+  input,select{-webkit-user-select:text; user-select:text}
   h1,h2,h3{margin:0; font-weight:600; letter-spacing:-0.01em}
   button{font-family:inherit; font-size:inherit; cursor:pointer; border:none; background:none; color:inherit}
   button:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--hold); outline-offset:2px}
@@ -37,8 +36,8 @@
   .grow{flex:1}
   .dim{color:var(--dim); font-size:12.5px}
 
-  .tabs{display:flex; gap:4px; background:var(--panel); padding:4px; border-radius:12px; margin-bottom:14px}
-  .tab{flex:1; padding:10px 0; text-align:center; border-radius:9px; color:var(--muted); font-size:14px; font-weight:500}
+  .tabs{display:flex; gap:3px; background:var(--panel); padding:4px; border-radius:12px; margin-bottom:14px}
+  .tab{flex:1; padding:10px 0; text-align:center; border-radius:9px; color:var(--muted); font-size:13.5px; font-weight:500}
   .tab[aria-selected="true"]{background:var(--panel2); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line)}
 
   .hero{border-radius:14px; padding:18px 16px; margin-bottom:14px; background:var(--panel); border-left:5px solid var(--dim)}
@@ -55,13 +54,13 @@
   .cell{flex:1; background:var(--panel); border-radius:10px; padding:10px; min-width:0}
   .cell .k{font-size:11.5px; color:var(--dim); margin-bottom:2px}
   .cell .v{font-size:17px; font-weight:600; letter-spacing:-0.01em}
-  .cell .v.n{color:var(--block)}
+  .cell .v.n{color:var(--block)} .cell .v.p{color:var(--pass)}
   .bar{height:3px; border-radius:2px; background:var(--line); margin-top:7px; overflow:hidden}
   .bar i{display:block; height:100%; background:var(--pass); transition:width .25s}
   .bar i.hot{background:var(--hold)} .bar i.over{background:var(--block)}
 
   .sect{font-size:12.5px; color:var(--dim); margin:16px 2px 8px}
-  .check{background:var(--panel); border-radius:var(--r); padding:12px; margin-bottom:7px; border:1px solid transparent; transition:border-color .15s}
+  .check{background:var(--panel); border-radius:var(--r); padding:12px; margin-bottom:7px; border:1px solid transparent}
   .check.no{border-color:rgba(224,90,77,.5)}
   .check.yes{border-color:rgba(79,180,119,.28)}
   .check .q{font-size:14.5px}
@@ -76,6 +75,7 @@
   .btn{display:block; width:100%; padding:15px; border-radius:11px; font-weight:600; text-align:center; font-size:15px}
   .btn.go{background:var(--pass); color:#0C1512}
   .btn.stop{background:rgba(224,90,77,.14); color:var(--block); box-shadow:inset 0 0 0 1px rgba(224,90,77,.45)}
+  .btn.warn{background:rgba(155,127,212,.12); color:var(--violet); box-shadow:inset 0 0 0 1px rgba(155,127,212,.4)}
   .btn.ghost{background:var(--panel); color:var(--muted); box-shadow:inset 0 0 0 1px var(--line); font-weight:500}
   .btn[disabled]{opacity:.42}
   .btn.sm{padding:9px; font-size:13.5px; border-radius:9px}
@@ -83,15 +83,36 @@
   .entry{background:var(--panel); border-radius:var(--r); padding:11px 12px; margin-bottom:7px; border-left:3px solid var(--line)}
   .entry.won{border-left-color:var(--pass)} .entry.lost{border-left-color:var(--block)}
   .entry.blocked{border-left-color:var(--hold)}
+  .entry.viol{border-left-color:var(--violet)}
   .entry .top{display:flex; justify-content:space-between; gap:8px; align-items:baseline}
   .entry .m{font-weight:600; font-size:14.5px}
   .entry .r{font-size:13px; color:var(--muted); margin-top:4px; font-style:italic}
   .pnl{font-weight:650; font-size:15px; white-space:nowrap}
   .pnl.p{color:var(--pass)} .pnl.n{color:var(--block)}
+  .flag{display:inline-block; font-size:11.5px; padding:2px 7px; border-radius:20px; background:rgba(155,127,212,.16); color:var(--violet); margin-top:6px}
   .empty{text-align:center; color:var(--dim); padding:36px 20px; font-size:14px}
+  .acts{display:flex; gap:6px; margin-top:9px}
+  .acts button{flex:1; padding:8px; border-radius:8px; font-size:13px; background:var(--panel2); color:var(--muted); box-shadow:inset 0 0 0 1px var(--line)}
+  .acts button.del{color:var(--block)}
 
-  .veil{position:fixed; inset:0; background:rgba(6,10,11,.75); display:flex; align-items:flex-end; justify-content:center; z-index:50; padding:12px}
-  .sheet{background:var(--panel); border-radius:16px; padding:16px; width:100%; max-width:436px; border:1px solid var(--line); margin-bottom:env(safe-area-inset-bottom)}
+  /* calendar */
+  .calhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .calhead .mo{font-size:17px; font-weight:600}
+  .navb{width:42px; height:42px; border-radius:10px; background:var(--panel); font-size:19px; color:var(--muted)}
+  .dow{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:5px}
+  .dow div{text-align:center; font-size:11px; color:var(--dim)}
+  .grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+  .day{background:var(--panel); border-radius:9px; padding:6px 2px 5px; text-align:center; min-height:52px; position:relative; overflow:hidden}
+  .day.blank{background:transparent}
+  .day .n{font-size:12px; color:var(--muted)}
+  .day .p{font-size:11px; font-weight:650; margin-top:3px; line-height:1.2}
+  .day .p.up{color:var(--pass)} .day .p.dn{color:var(--block)} .day .p.flat{color:var(--dim)}
+  .day.today{box-shadow:inset 0 0 0 1.5px var(--muted)}
+  .day .v{position:absolute; top:4px; right:4px; width:5px; height:5px; border-radius:50%; background:var(--violet)}
+  .day.has{background:var(--panel2)}
+
+  .veil{position:fixed; inset:0; background:rgba(6,10,11,.75); display:flex; align-items:flex-end; justify-content:center; z-index:50; padding:12px; overflow-y:auto}
+  .sheet{background:var(--panel); border-radius:16px; padding:16px; width:100%; max-width:436px; border:1px solid var(--line); margin-bottom:env(safe-area-inset-bottom); max-height:88vh; overflow-y:auto}
   .sheet h3{font-size:17px; margin-bottom:5px}
   .field{margin-bottom:10px}
   .field label{display:block; font-size:12.5px; color:var(--muted); margin-bottom:5px}
@@ -104,6 +125,7 @@
 
 <div class="tabs" role="tablist">
   <button class="tab" role="tab" aria-selected="true" data-tab="gate">Gate</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="cal">Calendar</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="log">Log</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="rules">Rules</button>
 </div>
@@ -116,19 +138,25 @@
 const KEY = "betgate_v1";
 const D = {
   settings:{
-    perMatchCap: 7000,      // total exposure allowed on one match
-    maxMatchesPerDay: 2,    // distinct matches you may trade in a day
-    lossStopCount: 2,       // day closes after this many losing bets
-    dailyLossCap: 14000,    // ...or after this much lost, whichever comes first
-    monthlyLimit: 60000,    // monthly drawdown ceiling
-    sessionAllowed: false
+    matchCap: 7000,          // match-trading exposure per match
+    maxMatchesPerDay: 2,
+    lossStopCount: 2,
+    dailyLossCap: 14000,
+    monthlyLimit: 60000,
+    sessionEnabled: true,
+    sessionMatchCap: 5000,   // total session exposure per match
+    sessionLegCap: 2500,     // max per session leg
+    sessionMaxLegs: 2,       // must be split across this many goes
+    tipperName: "Venus"
   },
   bets:[], blocks:[]
 };
 let S = JSON.parse(JSON.stringify(D));
 let tab = "gate";
 let answers = {};
-let draft = { stake:"", market:"Match odds", match:"", reason:"" };
+let calMonth = null;
+const blankDraft = () => ({ stake:"", market:"Match odds", match:"", reason:"", source:"OWN" });
+let draft = blankDraft();
 
 /* ---------- storage ---------- */
 function load(){
@@ -153,15 +181,21 @@ function toast(msg, bad){
   const t = document.getElementById("toast");
   t.innerHTML = '<div class="toast'+(bad?' bad':'')+'">'+msg+'</div>';
   clearTimeout(toast._t);
-  toast._t = setTimeout(()=>{ t.innerHTML=""; }, 5500);
+  toast._t = setTimeout(()=>{ t.innerHTML=""; }, 5000);
 }
 
 /* ---------- helpers ---------- */
-const money = n => "\u20B9" + Math.round(n).toLocaleString("en-IN");
+const money = n => (n<0?"-":"") + "\u20B9" + Math.abs(Math.round(n)).toLocaleString("en-IN");
+const shortMoney = n => { const a=Math.abs(n); const s=n<0?"-":"+";
+  return a>=1000 ? s+(a/1000).toFixed(a>=10000?0:1).replace(/\.0$/,"")+"k" : s+a; };
 const dayKey = d => { const x = d?new Date(d):new Date(); return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); };
 const monKey = d => dayKey(d).slice(0,7);
 const norm = s => String(s||"").trim().toLowerCase().replace(/\s+/g," ");
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+const SRC = () => [ {id:"OWN", label:"My own read"}, {id:"TIP", label:S.settings.tipperName||"Venus"} ];
+const srcLabel = id => (SRC().find(x=>x.id===id)||{label:"My own read"}).label;
+const isSession = m => m === "Session";
 
 function stats(){
   const td = dayKey(), tm = monKey(), st = S.settings;
@@ -174,7 +208,6 @@ function stats(){
   const monthPnl    = S.bets.filter(b=>b.day.startsWith(tm)).reduce((a,b)=>a+(b.pnl||0),0);
   const monthDown   = Math.max(0, -monthPnl);
   const todayBlocks = S.blocks.filter(b=>b.day===td).length;
-
   const closedByCount  = todayLosses.length >= st.lossStopCount;
   const closedByAmount = lostAmount >= st.dailyLossCap;
   return { td, todayBets, todayLosses:todayLosses.length, lostAmount, todayPnl,
@@ -182,62 +215,81 @@ function stats(){
            dayClosed: closedByCount || closedByAmount };
 }
 
-/* exposure already committed on the match being entered */
-function matchExposure(){
-  const n = norm(draft.match);
-  if(!n) return 0;
-  return S.bets.filter(b=>b.day===dayKey() && norm(b.match)===n).reduce((a,b)=>a+(b.stake||0),0);
+/* exposure on the match being entered, split by kind */
+function exposure(){
+  const n = norm(draft.match); const td = dayKey();
+  const rows = n ? S.bets.filter(b=>b.day===td && norm(b.match)===n) : [];
+  const sess = rows.filter(b=>isSession(b.market));
+  return {
+    match:  rows.filter(b=>!isSession(b.market)).reduce((a,b)=>a+(b.stake||0),0),
+    session:sess.reduce((a,b)=>a+(b.stake||0),0),
+    legs:   sess.length
+  };
+}
+
+function sourceRecord(id){
+  const rows = S.bets.filter(b => (b.source||"OWN") === id);
+  const settled = rows.filter(b=>b.result);
+  const wins = settled.filter(b=>b.result==="WON").length;
+  const pnl = rows.reduce((a,b)=>a+(b.pnl||0),0);
+  const staked = rows.reduce((a,b)=>a+(b.stake||0),0);
+  return { n:rows.length, settled:settled.length, wins, pnl, staked, roi: staked ? (pnl/staked*100) : 0 };
 }
 
 /* ---------- checks ---------- */
 function buildChecks(){
-  const s = stats(), st = S.settings;
+  const s = stats(), st = S.settings, e = exposure();
   const stake = parseFloat(draft.stake)||0;
-  const exp = matchExposure();
+  const sess = isSession(draft.market);
   const isNewMatch = draft.match.trim() && !s.matchesToday.includes(norm(draft.match));
 
+  const capCheck = sess
+    ? { q:"Session leg within " + money(st.sessionLegCap) + ", match total under " + money(st.sessionMatchCap),
+        pass: st.sessionEnabled && draft.match.trim().length>0 && stake>0
+              && stake <= st.sessionLegCap
+              && e.legs < st.sessionMaxLegs
+              && (e.session + stake) <= st.sessionMatchCap,
+        note: !st.sessionEnabled ? "Sessions are switched off in your rules"
+            : !draft.match.trim() ? "Enter the match above"
+            : stake<=0 ? "Enter a stake above"
+            : stake > st.sessionLegCap ? "One go can't exceed " + money(st.sessionLegCap) + " \u2014 split it"
+            : e.legs >= st.sessionMaxLegs ? "Already " + e.legs + " session legs on this match, limit is " + st.sessionMaxLegs
+            : "Leg " + (e.legs+1) + " of " + st.sessionMaxLegs + " \u00B7 " + money(e.session+stake) + " of " + money(st.sessionMatchCap) }
+    : { q:"Match-trading exposure within " + money(st.matchCap),
+        pass: draft.match.trim().length>0 && stake>0 && (e.match + stake) <= st.matchCap,
+        note: !draft.match.trim() ? "Enter the match above"
+            : stake<=0 ? "Enter a stake above"
+            : e.match>0 ? money(e.match)+" already on this match, this takes it to "+money(e.match+stake)
+            : money(stake)+" of "+money(st.matchCap) };
+
   return [
-    { id:"c1", auto:true, q:"Day still open",
-      pass: !s.dayClosed,
+    { id:"c1", auto:true, q:"Day still open", pass: !s.dayClosed,
       note: s.dayClosed
         ? (s.closedByAmount ? "Closed \u2014 " + money(s.lostAmount) + " lost, cap is " + money(st.dailyLossCap)
                             : "Closed \u2014 " + s.todayLosses + " losing bets, stop is " + st.lossStopCount)
         : s.todayLosses + "/" + st.lossStopCount + " losses \u00B7 " + money(s.lostAmount) + " of " + money(st.dailyLossCap) },
 
-    { id:"c2", auto:true, q:"Nothing left unsettled",
-      pass: s.openBets.length === 0,
+    { id:"c2", auto:true, q:"Nothing left unsettled", pass: s.openBets.length === 0,
       note: s.openBets.length ? s.openBets.length + " bet(s) waiting to be settled in the Log" : "All settled" },
 
     { id:"c3", auto:true, q:"Within the daily match count",
       pass: !isNewMatch || s.matchesToday.length < st.maxMatchesPerDay,
       note: s.matchesToday.length + " of " + st.maxMatchesPerDay + " matches traded today" },
 
-    { id:"c4", auto:true, q:"Exposure on this match within " + money(st.perMatchCap),
-      pass: draft.match.trim().length>0 && stake>0 && (exp + stake) <= st.perMatchCap,
-      note: !draft.match.trim() ? "Enter the match above"
-          : stake<=0 ? "Enter a stake above"
-          : exp>0 ? money(exp)+" already on this match, this takes it to "+money(exp+stake)
-          : money(stake)+" of "+money(st.perMatchCap) },
+    Object.assign({ id:"c4", auto:true }, capCheck),
 
-    { id:"c5", auto:true,
-      q: st.sessionAllowed ? "Session stake within cap" : "Not a session market",
-      pass: draft.market !== "Session" ? true : (st.sessionAllowed && stake>0 && (exp+stake) <= st.perMatchCap),
-      note: draft.market === "Session"
-        ? (st.sessionAllowed ? "Session allowed, counted against the match cap" : "Sessions are switched off in your rules")
-        : "Market: " + draft.market },
-
-    { id:"c6", auto:true, q:"Month still inside limit",
+    { id:"c5", auto:true, q:"Month still inside limit",
       pass: (s.monthDown + stake) <= st.monthlyLimit,
       note: money(s.monthDown) + " down this month of " + money(st.monthlyLimit) },
 
-    { id:"c7", auto:true, q:"Reason written down before placing",
+    { id:"c6", auto:true, q:"Reason written down before placing",
       pass: draft.reason.trim().length >= 15,
       note: draft.reason.trim().length >= 15 ? "Recorded" : "Needs at least a full sentence" },
 
-    { id:"c8", auto:false, q:"I can name both likely XIs and how this venue plays \u2014 without looking it up now",
+    { id:"c7", auto:false, q:"I can name both likely XIs and how this venue plays \u2014 without looking it up now",
       note:"If you can't, you don't have an edge. You have a screen." },
 
-    { id:"c9", auto:false, q:"I'm calm, unhurried, and sober right now",
+    { id:"c8", auto:false, q:"I'm calm, unhurried, and sober right now",
       note:"Tilt, rush, and drink each cost more than any bad read." }
   ];
 }
@@ -247,36 +299,62 @@ function evaluate(checks){
   return { failed, open: failed.length===0, hardNo };
 }
 
-/* ---------- views ---------- */
+/* ---------- render ---------- */
 function render(){
   document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t.dataset.tab===tab));
-  document.getElementById("view").innerHTML = tab==="gate" ? gateView() : tab==="log" ? logView() : rulesView();
+  const v = document.getElementById("view");
+  v.innerHTML = tab==="gate" ? gateView() : tab==="cal" ? calView() : tab==="log" ? logView() : rulesView();
   wire();
 }
 
 function meters(s){
   const st = S.settings;
-  const lossPct = Math.min(100, s.lostAmount / st.dailyLossCap * 100);
-  const lcls = lossPct>=100?"over":lossPct>50?"hot":"";
-  const monPct = Math.min(100, s.monthDown / st.monthlyLimit * 100);
-  const mcls = monPct>85?"over":monPct>60?"hot":"";
+  const lp = Math.min(100, s.lostAmount / st.dailyLossCap * 100);
+  const mp = Math.min(100, s.monthDown / st.monthlyLimit * 100);
   return `
   <div class="strip">
-    <div class="cell"><div class="k">Today</div><div class="v ${s.todayPnl<0?'n':''}">${s.todayPnl>=0?"+":""}${money(s.todayPnl)}</div></div>
+    <div class="cell"><div class="k">Today</div><div class="v ${s.todayPnl<0?'n':s.todayPnl>0?'p':''}">${s.todayPnl>=0?"+":""}${money(s.todayPnl)}</div></div>
     <div class="cell"><div class="k">Matches</div><div class="v">${s.matchesToday.length}/${st.maxMatchesPerDay}</div></div>
     <div class="cell"><div class="k">Stopped</div><div class="v">${s.todayBlocks}</div></div>
   </div>
   <div class="strip" style="margin-top:8px">
     <div class="cell">
       <div class="k">Lost today \u00B7 stop ${money(st.dailyLossCap)}</div>
-      <div class="v ${lossPct>=100?'n':''}">${money(s.lostAmount)}</div>
-      <div class="bar"><i class="${lcls}" style="width:${lossPct}%"></i></div>
+      <div class="v ${lp>=100?'n':''}">${money(s.lostAmount)}</div>
+      <div class="bar"><i class="${lp>=100?'over':lp>50?'hot':''}" style="width:${lp}%"></i></div>
     </div>
     <div class="cell">
       <div class="k">Month \u00B7 limit ${money(st.monthlyLimit)}</div>
-      <div class="v ${monPct>=100?'n':''}">${money(s.monthDown)}</div>
-      <div class="bar"><i class="${mcls}" style="width:${monPct}%"></i></div>
+      <div class="v ${mp>=100?'n':''}">${money(s.monthDown)}</div>
+      <div class="bar"><i class="${mp>85?'over':mp>60?'hot':''}" style="width:${mp}%"></i></div>
     </div>
+  </div>`;
+}
+
+function betForm(){
+  const st = S.settings, e = exposure();
+  const r = sourceRecord(draft.source);
+  const rec = r.settled<1
+    ? `<div class="dim" style="margin-top:6px">No settled record yet for this source.</div>`
+    : `<div class="dim" style="margin-top:6px">Running: <span style="color:var(--${r.pnl>=0?'pass':'block'})">${r.pnl>=0?"+":""}${money(r.pnl)}</span> over ${r.settled} settled \u00B7 ${r.wins} won \u00B7 ROI ${r.roi.toFixed(1)}%</div>`;
+  const expNote = draft.match.trim()
+    ? `<div class="dim" style="margin-top:6px">On this match today: ${money(e.match)} trading${e.legs?`, ${money(e.session)} session across ${e.legs} leg${e.legs>1?"s":""}`:""}</div>` : "";
+
+  return `
+  <div class="check">
+    <div class="field"><label>Match \u2014 exposure is tracked per match</label>
+      <input id="f-match" value="${esc(draft.match)}" placeholder="e.g. MI v CSK">${expNote}</div>
+    <div class="row" style="margin-bottom:10px; align-items:flex-end">
+      <div class="grow"><label class="dim" style="display:block;margin-bottom:5px">Market</label>
+        <select id="f-market">${["Match odds","Runline","Live trade","Session","Other"].map(m=>`<option ${draft.market===m?"selected":""}>${m}</option>`).join("")}</select></div>
+      <div class="grow"><label class="dim" style="display:block;margin-bottom:5px">Stake</label>
+        <input id="f-stake" inputmode="numeric" value="${esc(draft.stake)}" placeholder="0"></div>
+    </div>
+    ${isSession(draft.market)?`<div class="dim" style="margin:-4px 0 10px">Sessions go in ${st.sessionMaxLegs} legs of ${money(st.sessionLegCap)}, ${money(st.sessionMatchCap)} total per match.</div>`:""}
+    <div class="field"><label>Where this call came from</label>
+      <select id="f-source">${SRC().map(x=>`<option value="${x.id}" ${draft.source===x.id?"selected":""}>${esc(x.label)}</option>`).join("")}</select>${rec}</div>
+    <div class="field" style="margin:0"><label>Why this bet \u2014 written before you place it</label>
+      <input id="f-reason" value="${esc(draft.reason)}" placeholder="One sentence. What's the edge?"></div>
   </div>`;
 }
 
@@ -295,10 +373,12 @@ function gateView(){
     ${meters(s)}
     <div class="check" style="margin-top:14px">
       <div class="q">Nothing to decide now.</div>
-      <div class="note">This is the rule you set when you were thinking clearly. It is doing exactly what you built it to do. Close the app, put the phone down, and come back tomorrow.</div>
+      <div class="note">This is the rule you set when you were thinking clearly. Close the app and come back tomorrow.</div>
     </div>
-    <button class="btn stop" id="stopped" style="margin-top:8px">I wanted to bet anyway \u2014 record it</button>
-    <div class="dim" style="text-align:center; margin-top:12px">Logging the urge is worth more than logging the bet.</div>`;
+    <button class="btn stop" id="stopped" style="margin-top:8px">I wanted to bet anyway \u2014 record the urge</button>
+    <div style="height:8px"></div>
+    <button class="btn warn" id="override">I placed one anyway \u2014 log it as a rule break</button>
+    <div class="dim" style="text-align:center; margin-top:12px">If you break the rule, log it honestly. A hidden break is the only one that teaches you nothing.</div>`;
   }
 
   const checks = buildChecks(), r = evaluate(checks);
@@ -316,18 +396,7 @@ function gateView(){
   ${meters(s)}
 
   <div class="sect">The bet</div>
-  <div class="check">
-    <div class="field"><label>Match \u2014 exposure is tracked per match</label>
-      <input id="f-match" value="${esc(draft.match)}" placeholder="e.g. MI v CSK"></div>
-    <div class="row" style="margin-bottom:10px; align-items:flex-end">
-      <div class="grow"><label class="dim" style="display:block;margin-bottom:5px">Market</label>
-        <select id="f-market">${["Match odds","Runline","Live trade","Session","Other"].map(m=>`<option ${draft.market===m?"selected":""}>${m}</option>`).join("")}</select></div>
-      <div class="grow"><label class="dim" style="display:block;margin-bottom:5px">Stake</label>
-        <input id="f-stake" inputmode="numeric" value="${esc(draft.stake)}" placeholder="0"></div>
-    </div>
-    <div class="field" style="margin:0"><label>Why this bet \u2014 written before you place it</label>
-      <input id="f-reason" value="${esc(draft.reason)}" placeholder="One sentence. What's the edge?"></div>
-  </div>
+  ${betForm()}
 
   <div class="sect">Pre-flight checks</div>
   ${checks.map(c=>{
@@ -349,44 +418,150 @@ function gateView(){
     ${r.open ? `<button class="btn go" id="place">Log this bet and place it</button>`
              : `<button class="btn go" disabled>Log this bet and place it</button>
                 <div style="height:8px"></div>
-                <button class="btn stop" id="stopped">I did not place it \u2014 record the stop</button>`}
+                <button class="btn stop" id="stopped">I did not place it \u2014 record the stop</button>
+                <div style="height:8px"></div>
+                <button class="btn warn" id="override">I placed it anyway \u2014 log as rule break</button>`}
   </div>
   <div class="dim" style="text-align:center; margin-top:12px">Settle every bet in the Log. The day can't close if the app doesn't know you lost.</div>`;
 }
 
+/* ---------- calendar ---------- */
+function dayPnl(key){
+  const rows = S.bets.filter(b=>b.day===key);
+  return { pnl: rows.reduce((a,b)=>a+(b.pnl||0),0), n: rows.length,
+           viol: rows.some(b=>b.violation), open: rows.some(b=>!b.result) };
+}
+function calView(){
+  if(!calMonth) calMonth = monKey();
+  const [y,m] = calMonth.split("-").map(Number);
+  const first = new Date(y, m-1, 1);
+  const days  = new Date(y, m, 0).getDate();
+  const lead  = (first.getDay()+6)%7;   // Monday-first
+  const label = first.toLocaleString("en-GB",{month:"long", year:"numeric"});
+
+  const rows = S.bets.filter(b=>b.day.startsWith(calMonth));
+  const pnl  = rows.reduce((a,b)=>a+(b.pnl||0),0);
+  const violDays = [...new Set(rows.filter(b=>b.violation).map(b=>b.day))].length;
+  const tradedDays = [...new Set(rows.map(b=>b.day))].length;
+  const winDays = [...new Set(rows.map(b=>b.day))].filter(d=>dayPnl(d).pnl>0).length;
+  const blocksMonth = S.blocks.filter(b=>b.day.startsWith(calMonth)).length;
+
+  let cells = "";
+  for(let i=0;i<lead;i++) cells += `<div class="day blank"></div>`;
+  for(let d=1; d<=days; d++){
+    const key = calMonth+"-"+String(d).padStart(2,"0");
+    const info = dayPnl(key);
+    const cls = info.n ? "has" : "";
+    const today = key===dayKey() ? "today" : "";
+    const pcls = info.n===0 ? "flat" : info.pnl>0 ? "up" : info.pnl<0 ? "dn" : "flat";
+    const text = info.n===0 ? "\u2014" : (info.open ? "\u00B7\u00B7\u00B7" : shortMoney(info.pnl));
+    cells += `<div class="day ${cls} ${today}" data-day="${key}">
+      ${info.viol?`<span class="v"></span>`:""}
+      <div class="n">${d}</div><div class="p ${pcls}">${text}</div></div>`;
+  }
+
+  return `
+  <div class="calhead">
+    <button class="navb" id="cal-prev">\u2039</button>
+    <div class="mo">${label}</div>
+    <button class="navb" id="cal-next">\u203A</button>
+  </div>
+  <div class="strip">
+    <div class="cell"><div class="k">Month P&amp;L</div><div class="v ${pnl<0?'n':pnl>0?'p':''}">${pnl>=0?"+":""}${money(pnl)}</div></div>
+    <div class="cell"><div class="k">Green days</div><div class="v">${winDays}/${tradedDays}</div></div>
+  </div>
+  <div class="strip" style="margin-top:8px">
+    <div class="cell"><div class="k">Rule breaks</div><div class="v ${violDays?'n':''}">${violDays} day${violDays===1?"":"s"}</div></div>
+    <div class="cell"><div class="k">Times stopped</div><div class="v">${blocksMonth}</div></div>
+  </div>
+
+  <div class="sect">Tap a day to see its bets</div>
+  <div class="dow">${["M","T","W","T","F","S","S"].map(d=>`<div>${d}</div>`).join("")}</div>
+  <div class="grid">${cells}</div>
+  <div class="dim" style="margin-top:12px">A dot in the corner marks a day you broke your own rules. Days with an unsettled bet show \u00B7\u00B7\u00B7 instead of a figure.</div>`;
+}
+
+function dayModal(key){
+  const rows = S.bets.filter(b=>b.day===key).sort((a,b)=>a.ts-b.ts);
+  const blk  = S.blocks.filter(b=>b.day===key);
+  const info = dayPnl(key);
+  const nice = new Date(key+"T00:00:00").toLocaleDateString("en-GB",{weekday:"short", day:"numeric", month:"short", year:"numeric"});
+  document.getElementById("modal").innerHTML = `
+  <div class="veil" id="veil"><div class="sheet">
+    <h3>${nice}</h3>
+    <div class="dim" style="margin-bottom:12px">${rows.length} bet${rows.length===1?"":"s"} \u00B7 ${blk.length} stop${blk.length===1?"":"s"} \u00B7 net <span style="color:var(--${info.pnl>=0?'pass':'block'})">${info.pnl>=0?"+":""}${money(info.pnl)}</span></div>
+    ${rows.length===0 && blk.length===0 ? `<div class="empty">Nothing logged this day.</div>` : ""}
+    ${rows.map(b=>entryHtml(b)).join("")}
+    ${blk.map(b=>`<div class="entry blocked"><div class="m">Stopped by the gate</div><div class="r">${esc(b.failed||"")}</div></div>`).join("")}
+    <button class="btn ghost sm" id="m-cancel" style="margin-top:10px">Close</button>
+  </div></div>`;
+  document.getElementById("m-cancel").onclick = closeModal;
+  document.getElementById("veil").onclick = e=>{ if(e.target.id==="veil") closeModal(); };
+  wireEntries();
+}
+
+/* ---------- log ---------- */
+function entryHtml(it){
+  const cls = it.violation ? "viol" : it.result==="WON" ? "won" : it.result==="LOST" ? "lost" : "";
+  return `<div class="entry ${cls}">
+    <div class="top">
+      <div class="m">${esc(it.match||"Untitled")} <span class="dim">\u00B7 ${esc(it.market)}</span></div>
+      ${it.result ? `<div class="pnl ${it.pnl>=0?'p':'n'}">${it.pnl>=0?"+":""}${money(it.pnl)}</div>` : `<span class="auto">open</span>`}
+    </div>
+    <div class="r">${esc(it.reason)}</div>
+    <div class="dim" style="margin-top:3px">${money(it.stake)} staked \u00B7 ${it.day} \u00B7 ${esc(srcLabel(it.source||"OWN"))}</div>
+    ${it.violation?`<div class="flag">Rule break \u2014 ${esc(it.violationReason||"placed outside the gate")}</div>`:""}
+    <div class="acts">
+      ${it.result ? `<button data-resettle="${it.id}">Edit result</button>` : `<button data-settle="${it.id}">Settle</button>`}
+      <button class="del" data-del="${it.id}">Delete</button>
+    </div>
+  </div>`;
+}
+
 function logView(){
   const items = [...S.bets.map(b=>({...b,kind:"bet"})), ...S.blocks.map(b=>({...b,kind:"block"}))]
-    .sort((a,b)=>b.ts-a.ts).slice(0,80);
+    .sort((a,b)=>b.ts-a.ts).slice(0,60);
   const settled = S.bets.filter(b=>b.result);
   const wins = settled.filter(b=>b.result==="WON").length;
   const all = S.bets.reduce((a,b)=>a+(b.pnl||0),0);
   const stops = S.blocks.length;
-  const rate = (S.bets.length+stops) ? Math.round(stops/(S.bets.length+stops)*100) : 0;
+  const viol = S.bets.filter(b=>b.violation).length;
+  const disc = (S.bets.length+stops) ? Math.round((S.bets.length-viol+stops)/(S.bets.length+stops)*100) : 100;
 
   return `
   <div class="strip">
-    <div class="cell"><div class="k">All time</div><div class="v ${all<0?'n':''}">${all>=0?"+":""}${money(all)}</div></div>
+    <div class="cell"><div class="k">All time</div><div class="v ${all<0?'n':all>0?'p':''}">${all>=0?"+":""}${money(all)}</div></div>
     <div class="cell"><div class="k">Settled</div><div class="v">${wins}/${settled.length}</div></div>
-    <div class="cell"><div class="k">Stops</div><div class="v">${stops} \u00B7 ${rate}%</div></div>
   </div>
-  <div style="height:8px"></div>
+  <div class="strip" style="margin-top:8px">
+    <div class="cell"><div class="k">Stops taken</div><div class="v">${stops}</div></div>
+    <div class="cell"><div class="k">Rule breaks</div><div class="v ${viol?'n':''}">${viol}</div></div>
+    <div class="cell"><div class="k">Discipline</div><div class="v ${disc<80?'n':''}">${disc}%</div></div>
+  </div>
+
+  <div class="sect">By source</div>
+  ${SRC().map(x=>{
+    const r = sourceRecord(x.id);
+    if(r.n===0) return `<div class="check"><div class="row"><div class="q grow">${esc(x.label)}</div><span class="auto">no bets</span></div></div>`;
+    return `<div class="check">
+      <div class="row" style="align-items:baseline; gap:10px">
+        <div class="q grow">${esc(x.label)}</div>
+        <div class="pnl ${r.pnl>=0?'p':'n'}">${r.pnl>=0?"+":""}${money(r.pnl)}</div>
+      </div>
+      <div class="note">${r.wins}/${r.settled} settled won \u00B7 ${money(r.staked)} staked \u00B7 ROI ${r.roi.toFixed(1)}%${r.settled<10?" \u00B7 too few to judge yet":""}</div>
+    </div>`;
+  }).join("")}
+
+  <div class="sect">Everything</div>
   ${items.length===0 ? `<div class="empty">Nothing logged yet. Every bet and every stop lands here.</div>` :
   items.map(it => it.kind==="block"
     ? `<div class="entry blocked">
          <div class="top"><div class="m">Stopped by the gate</div><div class="dim">${it.day}</div></div>
-         <div class="r">${esc(it.failed||"\u2014")}</div>
+         <div class="r">${esc(it.failed||"")}</div>
          ${it.stake?`<div class="dim" style="margin-top:3px">${money(it.stake)} not staked</div>`:""}
+         <div class="acts"><button class="del" data-delblock="${it.id}">Delete</button></div>
        </div>`
-    : `<div class="entry ${it.result==='WON'?'won':it.result==='LOST'?'lost':''}">
-         <div class="top">
-           <div class="m">${esc(it.match||"Untitled")} <span class="dim">\u00B7 ${esc(it.market)}</span></div>
-           ${it.result ? `<div class="pnl ${it.pnl>=0?'p':'n'}">${it.pnl>=0?"+":""}${money(it.pnl)}</div>`
-                       : `<button class="btn sm ghost" style="width:auto;padding:6px 11px" data-settle="${it.id}">Settle</button>`}
-         </div>
-         <div class="r">${esc(it.reason)}</div>
-         <div class="dim" style="margin-top:3px">${money(it.stake)} \u00B7 ${it.day}</div>
-       </div>`
-  ).join("")}`;
+    : entryHtml(it)).join("")}`;
 }
 
 function rulesView(){
@@ -394,20 +569,34 @@ function rulesView(){
   const mismatch = st.dailyLossCap * 4 > st.monthlyLimit;
   return `
   <div class="dim" style="margin:0 2px 14px">Set these when you're calm. They only work if you don't edit them mid-session.</div>
+  <div class="sect">Match trading</div>
   <div class="check">
-    <div class="field"><label>Exposure cap per match</label><input id="s-mcap" inputmode="numeric" value="${st.perMatchCap}"></div>
-    <div class="field"><label>Matches you may trade in a day</label><input id="s-mmax" inputmode="numeric" value="${st.maxMatchesPerDay}"></div>
+    <div class="field"><label>Exposure cap per match</label><input id="s-mcap" inputmode="numeric" value="${st.matchCap}"></div>
+    <div class="field" style="margin:0"><label>Matches you may trade in a day</label><input id="s-mmax" inputmode="numeric" value="${st.maxMatchesPerDay}"></div>
+  </div>
+  <div class="sect">Session</div>
+  <div class="check">
+    <div class="field"><label>Session markets</label>
+      <select id="s-sess">
+        <option value="0" ${st.sessionEnabled?"":"selected"}>Blocked entirely</option>
+        <option value="1" ${st.sessionEnabled?"selected":""}>Allowed, split across legs</option>
+      </select></div>
+    <div class="field"><label>Total session per match</label><input id="s-scap" inputmode="numeric" value="${st.sessionMatchCap}"></div>
+    <div class="field"><label>Maximum per leg</label><input id="s-sleg" inputmode="numeric" value="${st.sessionLegCap}"></div>
+    <div class="field" style="margin:0"><label>Number of legs allowed</label><input id="s-slegs" inputmode="numeric" value="${st.sessionMaxLegs}"></div>
+  </div>
+  <div class="sect">Stops</div>
+  <div class="check">
     <div class="field"><label>Day closes after this many losing bets</label><input id="s-stop" inputmode="numeric" value="${st.lossStopCount}"></div>
     <div class="field"><label>Day closes at this much lost</label><input id="s-dcap" inputmode="numeric" value="${st.dailyLossCap}"></div>
-    <div class="field"><label>Monthly loss limit</label><input id="s-mon" inputmode="numeric" value="${st.monthlyLimit}"></div>
-    <div class="field" style="margin:0"><label>Session markets</label>
-      <select id="s-sess">
-        <option value="0" ${st.sessionAllowed?"":"selected"}>Blocked entirely</option>
-        <option value="1" ${st.sessionAllowed?"selected":""}>Allowed within the match cap</option>
-      </select></div>
+    <div class="field" style="margin:0"><label>Monthly loss limit</label><input id="s-mon" inputmode="numeric" value="${st.monthlyLimit}"></div>
   </div>
-  ${mismatch?`<div class="check no" style="margin-top:8px"><div class="q">These two don't agree</div>
+  ${mismatch?`<div class="check no"><div class="q">These two don't agree</div>
     <div class="note">Four bad days at ${money(st.dailyLossCap)} would pass your ${money(st.monthlyLimit)} month limit. Raise the month, or lower the day.</div></div>`:""}
+  <div class="sect">Sources</div>
+  <div class="check">
+    <div class="field" style="margin:0"><label>Tipper name</label><input id="s-tip" value="${esc(st.tipperName||"")}" placeholder="Venus"></div>
+  </div>
   <button class="btn go" id="s-save" style="margin-top:12px">Save rules</button>
 
   <div class="sect">Backup</div>
@@ -415,7 +604,6 @@ function rulesView(){
     <button class="btn ghost grow" id="s-export">Export data</button>
     <button class="btn ghost grow" id="s-import">Restore</button>
   </div>
-
   <div class="dim" style="margin-top:20px; line-height:1.6">
     If you find yourself widening these numbers after a losing day, that's the signal \u2014 not a settings problem.
     Tele-MANAS, India's free mental-health helpline, is 14416.
@@ -430,95 +618,137 @@ function wire(){
     e.oninput = ()=>{ draft[k]=e.value; softRefresh(); };
     e.onchange= ()=>{ draft[k]=e.value; softRefresh(); };
   };
-  bind("f-match","match"); bind("f-stake","stake"); bind("f-reason","reason"); bind("f-market","market");
+  bind("f-match","match"); bind("f-stake","stake"); bind("f-reason","reason");
+  bind("f-market","market"); bind("f-source","source");
 
   document.querySelectorAll("[data-yn]").forEach(b=> b.onclick = ()=>{ answers[b.dataset.yn] = b.dataset.val==="1"; softRefresh(); });
 
-  const p = document.getElementById("place");   if(p) p.onclick = placeBet;
-  const s = document.getElementById("stopped"); if(s) s.onclick = recordStop;
-  document.querySelectorAll("[data-settle]").forEach(b=> b.onclick = ()=> settleModal(b.dataset.settle));
+  const p = document.getElementById("place");    if(p) p.onclick = ()=>placeBet(false);
+  const s = document.getElementById("stopped");  if(s) s.onclick = recordStop;
+  const o = document.getElementById("override"); if(o) o.onclick = overrideModal;
+
+  const cp = document.getElementById("cal-prev"); if(cp) cp.onclick = ()=>shiftMonth(-1);
+  const cn = document.getElementById("cal-next"); if(cn) cn.onclick = ()=>shiftMonth(1);
+  document.querySelectorAll("[data-day]").forEach(d=> d.onclick = ()=> dayModal(d.dataset.day));
+
+  wireEntries();
 
   const sv = document.getElementById("s-save");
   if(sv) sv.onclick = ()=>{
     const g = id => parseFloat(document.getElementById(id).value)||0;
     S.settings = {
-      perMatchCap:      Math.max(1, g("s-mcap")),
+      matchCap:         Math.max(1, g("s-mcap")),
       maxMatchesPerDay: Math.max(1, g("s-mmax")),
       lossStopCount:    Math.max(1, g("s-stop")),
       dailyLossCap:     Math.max(1, g("s-dcap")),
       monthlyLimit:     Math.max(1, g("s-mon")),
-      sessionAllowed:   document.getElementById("s-sess").value==="1"
+      sessionEnabled:   document.getElementById("s-sess").value==="1",
+      sessionMatchCap:  Math.max(1, g("s-scap")),
+      sessionLegCap:    Math.max(1, g("s-sleg")),
+      sessionMaxLegs:   Math.max(1, g("s-slegs")),
+      tipperName:       (document.getElementById("s-tip").value||"Venus").trim()
     };
     if(save()){ toast("Rules saved."); tab="gate"; render(); }
   };
   const ex = document.getElementById("s-export"); if(ex) ex.onclick = doExport;
   const im = document.getElementById("s-import"); if(im) im.onclick = importModal;
 }
+function wireEntries(){
+  document.querySelectorAll("[data-settle]").forEach(b=> b.onclick = ()=> settleModal(b.dataset.settle));
+  document.querySelectorAll("[data-resettle]").forEach(b=> b.onclick = ()=> settleModal(b.dataset.resettle));
+  document.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=> deleteModal(b.dataset.del, "bet"));
+  document.querySelectorAll("[data-delblock]").forEach(b=> b.onclick = ()=> deleteModal(b.dataset.delblock, "block"));
+}
 function softRefresh(){
   const a = document.activeElement, id = a?a.id:null, pos = a && a.selectionStart;
   render();
   if(id){ const e=document.getElementById(id); if(e){ e.focus(); try{ e.setSelectionRange(pos,pos);}catch(_){} } }
 }
+function shiftMonth(n){
+  const [y,m] = calMonth.split("-").map(Number);
+  const d = new Date(y, m-1+n, 1);
+  calMonth = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  render();
+}
 
-function placeBet(){
-  S.bets.push({ id:"b"+Date.now(), ts:Date.now(), day:dayKey(), match:draft.match.trim()||"Untitled",
-    market:draft.market, stake:parseFloat(draft.stake)||0, reason:draft.reason, result:null, pnl:0 });
+/* ---------- actions ---------- */
+function placeBet(violation, violationReason){
+  S.bets.push({ id:"b"+Date.now()+Math.random().toString(36).slice(2,5), ts:Date.now(), day:dayKey(),
+    match:draft.match.trim()||"Untitled", market:draft.market, stake:parseFloat(draft.stake)||0,
+    reason:draft.reason, source:draft.source||"OWN", result:null, pnl:0,
+    violation: !!violation, violationReason: violationReason||"" });
   save();
-  draft = { stake:"", market:"Match odds", match:"", reason:"" }; answers = {};
+  draft = blankDraft(); answers = {};
   tab="log"; render();
-  toast("Logged. Settle it here as soon as it finishes.");
+  toast(violation ? "Logged as a rule break. Settle it when it finishes." : "Logged. Settle it in the Log when it finishes.");
 }
 function recordStop(){
   const s = stats();
-  const failed = s.dayClosed
-    ? "Day already closed"
-    : evaluate(buildChecks()).failed.map(c=>c.q).join("; ");
-  S.blocks.push({ id:"x"+Date.now(), ts:Date.now(), day:dayKey(), stake: parseFloat(draft.stake)||0, failed });
+  const failed = s.dayClosed ? "Day already closed" : evaluate(buildChecks()).failed.map(c=>c.q).join("; ");
+  S.blocks.push({ id:"x"+Date.now()+Math.random().toString(36).slice(2,5), ts:Date.now(), day:dayKey(),
+    stake: parseFloat(draft.stake)||0, failed });
   save();
-  draft = { stake:"", market:"Match odds", match:"", reason:"" }; answers = {};
+  draft = blankDraft(); answers = {};
   render();
   toast("Recorded. That's the win today.");
 }
 
 function closeModal(){ document.getElementById("modal").innerHTML=""; }
+function sheet(html){
+  document.getElementById("modal").innerHTML = `<div class="veil" id="veil"><div class="sheet">${html}</div></div>`;
+  document.getElementById("veil").onclick = e=>{ if(e.target.id==="veil") closeModal(); };
+  const c = document.getElementById("m-cancel"); if(c) c.onclick = closeModal;
+}
+
+function overrideModal(){
+  const s = stats();
+  const failed = s.dayClosed ? "Day was already closed" : evaluate(buildChecks()).failed.map(c=>c.q).join("; ");
+  sheet(`
+    <h3>Log a rule break</h3>
+    <div class="dim" style="margin-bottom:12px">This records the bet and marks the day. Nothing is hidden and nothing is judged \u2014 the count is what makes the pattern visible.</div>
+    <div class="check no" style="margin-bottom:12px"><div class="note" style="margin:0">Broke: ${esc(failed||"gate rules")}</div></div>
+    ${!draft.match.trim() || !(parseFloat(draft.stake)>0) ? `<div class="check"><div class="note" style="margin:0">Fill in the match and stake on the Gate screen first, then come back.</div></div>
+      <button class="btn ghost sm" id="m-cancel" style="margin-top:10px">Close</button>`
+    : `<button class="btn warn" id="m-ok">Log ${money(parseFloat(draft.stake)||0)} on ${esc(draft.match.trim())} as a rule break</button>
+       <button class="btn ghost sm" id="m-cancel" style="margin-top:8px">Cancel</button>`}`);
+  const ok = document.getElementById("m-ok");
+  if(ok) ok.onclick = ()=>{ closeModal(); placeBet(true, failed || "gate rules"); };
+}
 
 function settleModal(id){
   const b = S.bets.find(x=>x.id===id); if(!b) return;
-  document.getElementById("modal").innerHTML = `
-  <div class="veil" id="veil"><div class="sheet">
-    <h3>Settle this bet</h3>
-    <div class="dim" style="margin-bottom:12px">${esc(b.match)} \u00B7 ${money(b.stake)} staked</div>
-    <div class="field"><label>Profit if won \u2014 or leave blank and enter odds</label><input id="m-profit" inputmode="numeric" placeholder="e.g. 5950"></div>
-    <div class="field"><label>Decimal odds taken</label><input id="m-odds" inputmode="decimal" placeholder="1.85"></div>
+  sheet(`
+    <h3>${b.result?"Edit result":"Settle this bet"}</h3>
+    <div class="dim" style="margin-bottom:12px">${esc(b.match)} \u00B7 ${money(b.stake)} staked \u00B7 ${esc(b.market)}</div>
+    <div class="field"><label>Net profit or loss on this bet, after any hedging</label>
+      <input id="m-amt" inputmode="numeric" value="${b.result?Math.abs(b.pnl):""}" placeholder="e.g. 3200"></div>
     <div class="row" style="margin-top:12px">
-      <button class="btn go grow" id="m-won">Won</button>
-      <button class="btn stop grow" id="m-lost">Lost</button>
+      <button class="btn go grow" id="m-won">Profit</button>
+      <button class="btn stop grow" id="m-lost">Loss</button>
     </div>
-    <button class="btn ghost sm" id="m-part" style="margin-top:8px">Partial \u2014 enter exact P&amp;L</button>
-    <button class="btn ghost sm" id="m-cancel" style="margin-top:8px">Cancel</button>
-  </div></div>`;
-  document.getElementById("m-cancel").onclick = closeModal;
-  document.getElementById("veil").onclick = e=>{ if(e.target.id==="veil") closeModal(); };
-  document.getElementById("m-won").onclick = ()=>{
-    const pf = parseFloat(document.getElementById("m-profit").value);
-    const o  = parseFloat(document.getElementById("m-odds").value)||0;
-    let profit = null;
-    if(!isNaN(pf) && pf>0) profit = Math.round(pf);
-    else if(o>1) profit = Math.round(b.stake*(o-1));
-    if(profit===null){ toast("Enter the profit, or odds above 1.00.", true); return; }
-    b.result="WON"; b.pnl = profit; save(); closeModal(); render();
-  };
-  document.getElementById("m-lost").onclick = ()=>{
-    b.result="LOST"; b.pnl = -b.stake; save(); closeModal(); render();
-    const s = stats();
-    if(s.dayClosed){ tab="gate"; render(); }
-  };
-  document.getElementById("m-part").onclick = ()=>{
-    const pf = parseFloat(document.getElementById("m-profit").value);
-    if(isNaN(pf)){ toast("Put the exact result in the profit box \u2014 negative for a loss.", true); return; }
-    b.result = pf>=0 ? "WON" : "LOST"; b.pnl = Math.round(pf); save(); closeModal();
-    const s = stats(); if(s.dayClosed) tab="gate";
-    render();
+    <button class="btn ghost sm" id="m-flat" style="margin-top:8px">Scratched \u2014 no profit, no loss</button>
+    <button class="btn ghost sm" id="m-cancel" style="margin-top:8px">Cancel</button>`);
+  const amt = ()=> Math.abs(parseFloat(document.getElementById("m-amt").value));
+  const apply = v => { b.result = v>0 ? "WON" : v<0 ? "LOST" : "WON"; b.pnl = Math.round(v);
+    save(); closeModal(); if(stats().dayClosed && tab==="gate"){} render(); };
+  document.getElementById("m-won").onclick  = ()=>{ const a=amt(); if(isNaN(a)){ toast("Enter the amount first.", true); return; } apply(a); };
+  document.getElementById("m-lost").onclick = ()=>{ const a=amt(); if(isNaN(a)){ toast("Enter the amount first.", true); return; } apply(-a); };
+  document.getElementById("m-flat").onclick = ()=> apply(0);
+}
+
+function deleteModal(id, kind){
+  const list = kind==="bet" ? S.bets : S.blocks;
+  const item = list.find(x=>x.id===id); if(!item) return;
+  const desc = kind==="bet" ? `${esc(item.match)} \u00B7 ${money(item.stake)} \u00B7 ${item.day}` : `Stop recorded on ${item.day}`;
+  sheet(`
+    <h3>Delete this entry?</h3>
+    <div class="dim" style="margin-bottom:14px">${desc}<br>This can't be undone.</div>
+    <button class="btn stop" id="m-ok">Delete</button>
+    <button class="btn ghost sm" id="m-cancel" style="margin-top:8px">Keep it</button>`);
+  document.getElementById("m-ok").onclick = ()=>{
+    if(kind==="bet") S.bets = S.bets.filter(x=>x.id!==id);
+    else S.blocks = S.blocks.filter(x=>x.id!==id);
+    save(); closeModal(); render(); toast("Deleted.");
   };
 }
 
@@ -531,15 +761,11 @@ function doExport(){
   toast("Backup downloaded.");
 }
 function importModal(){
-  document.getElementById("modal").innerHTML = `
-  <div class="veil" id="veil"><div class="sheet">
+  sheet(`
     <h3>Restore from backup</h3>
     <div class="dim" style="margin-bottom:12px">This replaces everything currently stored.</div>
     <input type="file" id="m-file" accept="application/json,.json">
-    <button class="btn ghost sm" id="m-cancel" style="margin-top:12px">Cancel</button>
-  </div></div>`;
-  document.getElementById("m-cancel").onclick = closeModal;
-  document.getElementById("veil").onclick = e=>{ if(e.target.id==="veil") closeModal(); };
+    <button class="btn ghost sm" id="m-cancel" style="margin-top:12px">Cancel</button>`);
   document.getElementById("m-file").onchange = e=>{
     const f = e.target.files[0]; if(!f) return;
     const rd = new FileReader();
