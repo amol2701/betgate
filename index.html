@@ -138,15 +138,13 @@
 const KEY = "betgate_v1";
 const D = {
   settings:{
-    matchCap: 7000,          // match-trading exposure per match
+    matchLossCap: 7000,      // most you may LOSE on one match (wins restore room)
     maxMatchesPerDay: 2,
     lossStopCount: 2,
     dailyLossCap: 14000,
     monthlyLimit: 60000,
     sessionEnabled: true,
-    sessionMatchCap: 5000,   // total session exposure per match
-    sessionLegCap: 2500,     // max per session leg
-    sessionMaxLegs: 2,       // must be split across this many goes
+    sessionLegCap: 2500,     // max stake on a single session bet
     tipperName: "Venus"
   },
   bets:[], blocks:[]
@@ -166,6 +164,8 @@ function load(){
       const p = JSON.parse(raw);
       S = Object.assign(JSON.parse(JSON.stringify(D)), p);
       S.settings = Object.assign(JSON.parse(JSON.stringify(D.settings)), p.settings||{});
+      if(p.settings && p.settings.matchCap && !p.settings.matchLossCap) S.settings.matchLossCap = p.settings.matchCap;
+      delete S.settings.matchCap; delete S.settings.sessionMatchCap; delete S.settings.sessionMaxLegs;
     }
   }catch(e){ toast("Couldn't read saved data. Restore from a backup in Rules if you have one.", true); }
 }
@@ -215,16 +215,17 @@ function stats(){
            dayClosed: closedByCount || closedByAmount };
 }
 
-/* exposure on the match being entered, split by kind */
-function exposure(){
+/* how much room is left to LOSE on the match being entered */
+function matchRisk(){
   const n = norm(draft.match); const td = dayKey();
   const rows = n ? S.bets.filter(b=>b.day===td && norm(b.match)===n) : [];
-  const sess = rows.filter(b=>isSession(b.market));
-  return {
-    match:  rows.filter(b=>!isSession(b.market)).reduce((a,b)=>a+(b.stake||0),0),
-    session:sess.reduce((a,b)=>a+(b.stake||0),0),
-    legs:   sess.length
-  };
+  const settled = rows.filter(b=>b.result);
+  const realised = settled.reduce((a,b)=>a+(b.pnl||0),0);
+  const openStake= rows.filter(b=>!b.result).reduce((a,b)=>a+(b.stake||0),0);
+  const cap = S.settings.matchLossCap;
+  // a settled win on this match buys room back; a loss eats into it
+  const room = Math.max(0, cap + realised - openStake);
+  return { rows, settled:settled.length, realised, openStake, cap, room };
 }
 
 function sourceRecord(id){
@@ -238,29 +239,28 @@ function sourceRecord(id){
 
 /* ---------- checks ---------- */
 function buildChecks(){
-  const s = stats(), st = S.settings, e = exposure();
+  const s = stats(), st = S.settings, r = matchRisk();
   const stake = parseFloat(draft.stake)||0;
   const sess = isSession(draft.market);
   const isNewMatch = draft.match.trim() && !s.matchesToday.includes(norm(draft.match));
 
   const capCheck = sess
-    ? { q:"Session leg within " + money(st.sessionLegCap) + ", match total under " + money(st.sessionMatchCap),
+    ? { q:"Session stake within " + money(st.sessionLegCap) + " and inside match room",
         pass: st.sessionEnabled && draft.match.trim().length>0 && stake>0
-              && stake <= st.sessionLegCap
-              && e.legs < st.sessionMaxLegs
-              && (e.session + stake) <= st.sessionMatchCap,
+              && stake <= st.sessionLegCap && stake <= r.room,
         note: !st.sessionEnabled ? "Sessions are switched off in your rules"
             : !draft.match.trim() ? "Enter the match above"
             : stake<=0 ? "Enter a stake above"
-            : stake > st.sessionLegCap ? "One go can't exceed " + money(st.sessionLegCap) + " \u2014 split it"
-            : e.legs >= st.sessionMaxLegs ? "Already " + e.legs + " session legs on this match, limit is " + st.sessionMaxLegs
-            : "Leg " + (e.legs+1) + " of " + st.sessionMaxLegs + " \u00B7 " + money(e.session+stake) + " of " + money(st.sessionMatchCap) }
-    : { q:"Match-trading exposure within " + money(st.matchCap),
-        pass: draft.match.trim().length>0 && stake>0 && (e.match + stake) <= st.matchCap,
+            : stake > st.sessionLegCap ? "One session bet can't exceed " + money(st.sessionLegCap)
+            : stake > r.room ? "Only " + money(r.room) + " of losing room left on this match"
+            : money(stake) + " \u00B7 " + money(r.room) + " of room left on this match" }
+    : { q:"Within what you may lose on this match",
+        pass: draft.match.trim().length>0 && stake>0 && stake <= r.room,
         note: !draft.match.trim() ? "Enter the match above"
             : stake<=0 ? "Enter a stake above"
-            : e.match>0 ? money(e.match)+" already on this match, this takes it to "+money(e.match+stake)
-            : money(stake)+" of "+money(st.matchCap) };
+            : r.realised > 0 ? "Up " + money(r.realised) + " here \u2014 " + money(r.room) + " of room"
+            : r.realised < 0 ? money(-r.realised) + " down here \u2014 " + money(r.room) + " of room left"
+            : money(stake) + " of " + money(r.cap) };
 
   return [
     { id:"c1", auto:true, q:"Day still open", pass: !s.dayClosed,
@@ -332,13 +332,13 @@ function meters(s){
 }
 
 function betForm(){
-  const st = S.settings, e = exposure();
+  const st = S.settings, r2 = matchRisk();
   const r = sourceRecord(draft.source);
   const rec = r.settled<1
     ? `<div class="dim" style="margin-top:6px">No settled record yet for this source.</div>`
     : `<div class="dim" style="margin-top:6px">Running: <span style="color:var(--${r.pnl>=0?'pass':'block'})">${r.pnl>=0?"+":""}${money(r.pnl)}</span> over ${r.settled} settled \u00B7 ${r.wins} won \u00B7 ROI ${r.roi.toFixed(1)}%</div>`;
   const expNote = draft.match.trim()
-    ? `<div class="dim" style="margin-top:6px">On this match today: ${money(e.match)} trading${e.legs?`, ${money(e.session)} session across ${e.legs} leg${e.legs>1?"s":""}`:""}</div>` : "";
+    ? `<div class="dim" style="margin-top:6px">This match today: ${r2.settled? (r2.realised>=0?"+":"")+money(r2.realised)+" settled \u00B7 ":""}<span style="color:var(--${r2.room>0?'muted':'block'})">${money(r2.room)} left to risk</span></div>` : "";
 
   return `
   <div class="check">
@@ -350,7 +350,7 @@ function betForm(){
       <div class="grow"><label class="dim" style="display:block;margin-bottom:5px">Stake</label>
         <input id="f-stake" inputmode="numeric" value="${esc(draft.stake)}" placeholder="0"></div>
     </div>
-    ${isSession(draft.market)?`<div class="dim" style="margin:-4px 0 10px">Sessions go in ${st.sessionMaxLegs} legs of ${money(st.sessionLegCap)}, ${money(st.sessionMatchCap)} total per match.</div>`:""}
+    ${isSession(draft.market)?`<div class="dim" style="margin:-4px 0 10px">Session bets are capped at ${money(st.sessionLegCap)} each and count against the match loss room.</div>`:""}
     <div class="field"><label>Where this call came from</label>
       <select id="f-source">${SRC().map(x=>`<option value="${x.id}" ${draft.source===x.id?"selected":""}>${esc(x.label)}</option>`).join("")}</select>${rec}</div>
     <div class="field" style="margin:0"><label>Why this bet \u2014 written before you place it</label>
@@ -569,21 +569,20 @@ function rulesView(){
   const mismatch = st.dailyLossCap * 4 > st.monthlyLimit;
   return `
   <div class="dim" style="margin:0 2px 14px">Set these when you're calm. They only work if you don't edit them mid-session.</div>
-  <div class="sect">Match trading</div>
+  <div class="sect">Per match</div>
   <div class="check">
-    <div class="field"><label>Exposure cap per match</label><input id="s-mcap" inputmode="numeric" value="${st.matchCap}"></div>
+    <div class="field"><label>Most you may lose on one match</label><input id="s-mcap" inputmode="numeric" value="${st.matchLossCap}"></div>
     <div class="field" style="margin:0"><label>Matches you may trade in a day</label><input id="s-mmax" inputmode="numeric" value="${st.maxMatchesPerDay}"></div>
+    <div class="note">A settled win on a match gives that room back, so you can bet it again. A loss eats into it.</div>
   </div>
   <div class="sect">Session</div>
   <div class="check">
     <div class="field"><label>Session markets</label>
       <select id="s-sess">
         <option value="0" ${st.sessionEnabled?"":"selected"}>Blocked entirely</option>
-        <option value="1" ${st.sessionEnabled?"selected":""}>Allowed, split across legs</option>
+        <option value="1" ${st.sessionEnabled?"selected":""}>Allowed</option>
       </select></div>
-    <div class="field"><label>Total session per match</label><input id="s-scap" inputmode="numeric" value="${st.sessionMatchCap}"></div>
-    <div class="field"><label>Maximum per leg</label><input id="s-sleg" inputmode="numeric" value="${st.sessionLegCap}"></div>
-    <div class="field" style="margin:0"><label>Number of legs allowed</label><input id="s-slegs" inputmode="numeric" value="${st.sessionMaxLegs}"></div>
+    <div class="field" style="margin:0"><label>Maximum on a single session bet</label><input id="s-sleg" inputmode="numeric" value="${st.sessionLegCap}"></div>
   </div>
   <div class="sect">Stops</div>
   <div class="check">
@@ -637,15 +636,13 @@ function wire(){
   if(sv) sv.onclick = ()=>{
     const g = id => parseFloat(document.getElementById(id).value)||0;
     S.settings = {
-      matchCap:         Math.max(1, g("s-mcap")),
+      matchLossCap:     Math.max(1, g("s-mcap")),
       maxMatchesPerDay: Math.max(1, g("s-mmax")),
       lossStopCount:    Math.max(1, g("s-stop")),
       dailyLossCap:     Math.max(1, g("s-dcap")),
       monthlyLimit:     Math.max(1, g("s-mon")),
       sessionEnabled:   document.getElementById("s-sess").value==="1",
-      sessionMatchCap:  Math.max(1, g("s-scap")),
       sessionLegCap:    Math.max(1, g("s-sleg")),
-      sessionMaxLegs:   Math.max(1, g("s-slegs")),
       tipperName:       (document.getElementById("s-tip").value||"Venus").trim()
     };
     if(save()){ toast("Rules saved."); tab="gate"; render(); }
